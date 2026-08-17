@@ -17,7 +17,11 @@ interface PersistedState {
   orders: Order[];
   mySubscriptionId: string | null;
   unavailableMealIds: string[];
+  meals: Meal[];
 }
+
+/** Fields the kitchen manager can edit from the admin console. */
+export type MealDraft = Pick<Meal, "name" | "description" | "image" | "goals" | "protein" | "calories" | "price">;
 
 interface DrDietValue {
   meals: Meal[];
@@ -38,6 +42,9 @@ interface DrDietValue {
   mySubscription: Subscriber | null;
   setMySubscriptionId: (id: string | null) => void;
   toggleMealAvailability: (mealId: string) => void;
+  addMeal: (draft: MealDraft) => Meal;
+  updateMeal: (mealId: string, draft: MealDraft) => void;
+  removeMeal: (mealId: string) => void;
   isAdminAuthed: boolean;
   adminUser: string | null;
   signInAdmin: (username: string, password: string) => boolean;
@@ -64,7 +71,11 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
   const [subscribers, setSubscribers] = useState<Subscriber[]>(persisted.subscribers ?? SEED_SUBSCRIBERS);
   const [orders, setOrders] = useState<Order[]>(persisted.orders ?? []);
   const [mySubscriptionId, setMySubscriptionId] = useState<string | null>(persisted.mySubscriptionId ?? null);
-  const [unavailableMealIds, setUnavailableMealIds] = useState<string[]>(persisted.unavailableMealIds ?? []);
+  const [meals, setMeals] = useState<Meal[]>(() => {
+    if (persisted.meals && persisted.meals.length > 0) return persisted.meals;
+    const unavailable = persisted.unavailableMealIds ?? [];
+    return MEALS.map((meal) => ({ ...meal, available: !unavailable.includes(meal.id) }));
+  });
   const [adminUser, setAdminUser] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     try {
@@ -76,17 +87,19 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const payload: PersistedState = { cart, subscribers, orders, mySubscriptionId, unavailableMealIds };
+      const payload: PersistedState = {
+        cart,
+        subscribers,
+        orders,
+        mySubscriptionId,
+        meals,
+        unavailableMealIds: meals.filter((meal) => !meal.available).map((meal) => meal.id),
+      };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch {
       /* storage unavailable — state stays in memory for this session */
     }
-  }, [cart, subscribers, orders, mySubscriptionId, unavailableMealIds]);
-
-  const meals = useMemo<Meal[]>(
-    () => MEALS.map((meal) => ({ ...meal, available: !unavailableMealIds.includes(meal.id) })),
-    [unavailableMealIds],
-  );
+  }, [cart, subscribers, orders, mySubscriptionId, meals]);
 
   const addToCart = useCallback((mealId: string) => {
     setCart((prev) => {
@@ -156,9 +169,30 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleMealAvailability = useCallback((mealId: string) => {
-    setUnavailableMealIds((prev) =>
-      prev.includes(mealId) ? prev.filter((id) => id !== mealId) : [...prev, mealId],
+    setMeals((prev) =>
+      prev.map((meal) => (meal.id === mealId ? { ...meal, available: !meal.available } : meal)),
     );
+  }, []);
+
+  const addMeal = useCallback((draft: MealDraft) => {
+    const created: Meal = {
+      ...draft,
+      id: `m-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      carbs: 0,
+      fat: 0,
+      available: true,
+    };
+    setMeals((prev) => [created, ...prev]);
+    return created;
+  }, []);
+
+  const updateMeal = useCallback((mealId: string, draft: MealDraft) => {
+    setMeals((prev) => prev.map((meal) => (meal.id === mealId ? { ...meal, ...draft } : meal)));
+  }, []);
+
+  const removeMeal = useCallback((mealId: string) => {
+    setMeals((prev) => prev.filter((meal) => meal.id !== mealId));
+    setCart((prev) => prev.filter((line) => line.mealId !== mealId));
   }, []);
 
   const signInAdmin = useCallback((username: string, password: string) => {
@@ -207,6 +241,9 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
       mySubscription,
       setMySubscriptionId,
       toggleMealAvailability,
+      addMeal,
+      updateMeal,
+      removeMeal,
       isAdminAuthed: adminUser !== null,
       adminUser,
       signInAdmin,
@@ -230,6 +267,9 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
       addOrder,
       mySubscription,
       toggleMealAvailability,
+      addMeal,
+      updateMeal,
+      removeMeal,
       adminUser,
       signInAdmin,
       signOutAdmin,

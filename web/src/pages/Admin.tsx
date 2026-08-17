@@ -7,6 +7,8 @@ import {
   ClipboardList,
   LayoutDashboard,
   LogOut,
+  Pencil,
+  Plus,
   Save,
   Search,
   Trash2,
@@ -17,7 +19,18 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+import { MealFormDialog } from "@/components/MealFormDialog";
 import { SiteLayout } from "@/components/SiteLayout";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,8 +45,8 @@ import { Switch } from "@/components/ui/switch";
 import { BRAND_STATS } from "@/data/subscribers";
 import { addMonths, daysUntil, formatIQD, formatNumber, toISODate } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { useDrDiet } from "@/store/DrDietStore";
-import type { Subscriber, SubscriberGoal, SubscriptionStatus } from "@/types";
+import { useDrDiet, type MealDraft } from "@/store/DrDietStore";
+import type { Meal, Subscriber, SubscriberGoal, SubscriptionStatus } from "@/types";
 
 type Section = "overview" | "subscribers" | "meals" | "orders" | "reports";
 
@@ -60,6 +73,9 @@ export default function Admin() {
     orders,
     meals,
     toggleMealAvailability,
+    addMeal,
+    updateMeal,
+    removeMeal,
     adminUser,
     signOutAdmin,
   } = useDrDiet();
@@ -76,6 +92,27 @@ export default function Admin() {
   const [goalFilter, setGoalFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState<number>(1);
+
+  const [mealDialogOpen, setMealDialogOpen] = useState<boolean>(false);
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
+  const [mealPendingDelete, setMealPendingDelete] = useState<Meal | null>(null);
+
+  const handleMealSubmit = (draft: MealDraft) => {
+    if (editingMeal) {
+      updateMeal(editingMeal.id, draft);
+      toast.success("تم حفظ التعديلات", { description: draft.name });
+      return;
+    }
+    addMeal(draft);
+    toast.success("تمت إضافة الوجبة", { description: draft.name });
+  };
+
+  const confirmMealDelete = () => {
+    if (!mealPendingDelete) return;
+    removeMeal(mealPendingDelete.id);
+    toast.success("تم حذف الوجبة", { description: mealPendingDelete.name });
+    setMealPendingDelete(null);
+  };
 
   const [form, setForm] = useState({
     name: "",
@@ -474,29 +511,87 @@ export default function Admin() {
 
             {section === "meals" && (
               <section className="panel overflow-hidden">
-                <h2 className="border-b border-border p-4 text-lg font-extrabold text-foreground">وجبات المطبخ</h2>
-                <ul className="divide-y divide-border">
-                  {meals.map((meal) => (
-                    <li key={meal.id} className="flex flex-wrap items-center gap-4 p-4">
-                      <img src={meal.image} alt="" loading="lazy" className="h-14 w-14 rounded-sm object-cover" />
-                      <div className="min-w-[180px] flex-1">
-                        <p className="text-sm font-extrabold text-foreground">{meal.name}</p>
-                        <p className="tnum text-xs text-muted-foreground">
-                          {meal.protein}غ بروتين · {meal.calories} سعرة
-                        </p>
-                      </div>
-                      <span className="tnum text-sm font-extrabold text-primary">{formatIQD(meal.price)}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{meal.available ? "متوفرة" : "موقوفة"}</span>
-                        <Switch
-                          checked={meal.available}
-                          onCheckedChange={() => toggleMealAvailability(meal.id)}
-                          aria-label={`تفعيل ${meal.name}`}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-foreground">وجبات المطبخ</h2>
+                    <p className="tnum mt-0.5 text-xs text-muted-foreground">
+                      {formatNumber(meals.length)} وجبة · {formatNumber(meals.filter((meal) => meal.available).length)}{" "}
+                      متوفرة اليوم
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setEditingMeal(null);
+                      setMealDialogOpen(true);
+                    }}
+                    className="h-10 gap-2 rounded-md bg-primary px-5 text-sm font-extrabold text-primary-foreground hover:bg-primary/90 active:scale-95"
+                  >
+                    <Plus className="h-4 w-4" />
+                    إضافة وجبة جديدة
+                  </Button>
+                </div>
+
+                {meals.length === 0 ? (
+                  <p className="p-12 text-center text-sm text-muted-foreground">
+                    ما كو وجبات بالقائمة — أضف أول وجبة حتى تظهر للمشتركين.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-border">
+                    {meals.map((meal) => (
+                      <li key={meal.id} className="flex flex-wrap items-center gap-4 p-4">
+                        <img
+                          src={meal.image}
+                          alt=""
+                          loading="lazy"
+                          className="h-14 w-14 shrink-0 rounded-sm border border-border object-cover"
                         />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                        <div className="min-w-[180px] flex-1">
+                          <p className="text-sm font-extrabold text-foreground">{meal.name}</p>
+                          <p className="tnum text-xs text-muted-foreground">
+                            {meal.protein}غ بروتين · {meal.calories} سعرة
+                          </p>
+                        </div>
+                        <span className="tnum text-sm font-extrabold text-primary">{formatIQD(meal.price)}</span>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">{meal.available ? "متوفرة" : "موقوفة"}</span>
+                          <Switch
+                            checked={meal.available}
+                            onCheckedChange={() => toggleMealAvailability(meal.id)}
+                            aria-label={`تفعيل ${meal.name}`}
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingMeal(meal);
+                              setMealDialogOpen(true);
+                            }}
+                            className="h-9 gap-1.5 rounded-md border-border bg-sunken px-3 text-xs font-extrabold text-foreground hover:border-primary/60 hover:text-primary"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                            تعديل
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setMealPendingDelete(meal)}
+                            className="h-9 w-9 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                            aria-label={`حذف ${meal.name}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </section>
             )}
 
@@ -627,6 +722,41 @@ export default function Admin() {
           </nav>
         </div>
       </div>
+
+      <MealFormDialog
+        open={mealDialogOpen}
+        onOpenChange={setMealDialogOpen}
+        meal={editingMeal}
+        onSubmit={handleMealSubmit}
+      />
+
+      <AlertDialog
+        open={mealPendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setMealPendingDelete(null);
+        }}
+      >
+        <AlertDialogContent className="max-w-md rounded-md border-border bg-card text-right">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-black text-foreground">حذف الوجبة؟</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
+              راح تنحذف «{mealPendingDelete?.name}» من القائمة العامة ومن سلات الطلب الحالية. هذا الإجراء لا يمكن التراجع
+              عنه.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:justify-start sm:space-x-0">
+            <AlertDialogAction
+              onClick={confirmMealDelete}
+              className="h-11 rounded-md bg-destructive px-6 text-sm font-extrabold text-destructive-foreground hover:bg-destructive/90"
+            >
+              نعم، احذفها
+            </AlertDialogAction>
+            <AlertDialogCancel className="mt-0 h-11 rounded-md border-border px-6 text-sm font-extrabold">
+              إلغاء
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SiteLayout>
   );
 }
