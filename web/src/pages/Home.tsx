@@ -7,7 +7,7 @@ import { MealCard } from "@/components/MealCard";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { GOAL_LABELS, GOAL_ORDER } from "@/data/meals";
-import { HERO_BRAND } from "@/data/images";
+import { BRAND_LOGO } from "@/data/images";
 import { BRAND_STATS } from "@/data/subscribers";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ const STEPS: { icon: typeof ScanLine; title: string; body: string }[] = [
   {
     icon: Truck,
     title: "نوصلها لباب بيتك",
-    body: "توصيل يومي 6 أيام بالأسبوع داخل بغداد بالوقت الذي تختاره.",
+    body: "توصيل يومي 6 أيام بالأسبوع داخل البصرة بالوقت الذي تختاره.",
   },
 ];
 
@@ -48,7 +48,7 @@ export default function Home() {
         {/* Ambient wash sampled from the brand key visual */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(45rem_32rem_at_28%_18%,hsl(160_84%_39%/0.16),transparent_65%),radial-gradient(40rem_30rem_at_85%_85%,hsl(219_63%_28%/0.35),transparent_65%)]"
+          className="absolute inset-0 bg-[radial-gradient(45rem_32rem_at_26%_16%,hsl(111_45%_36%/0.10),transparent_66%),radial-gradient(40rem_30rem_at_88%_82%,hsl(219_62%_26%/0.10),transparent_66%)]"
         />
         <div aria-hidden="true" className="absolute inset-0 noise-veil" />
 
@@ -56,7 +56,7 @@ export default function Home() {
           <div className="animate-rise-in space-y-6">
             <span className="inline-flex items-center gap-2 rounded-sm border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-extrabold text-primary">
               <Utensils className="h-3.5 w-3.5" />
-              مطبخ دكتور دايت — بغداد
+              مطبخ دكتور دايت — البصرة
             </span>
 
             <h1 className="text-4xl font-black leading-[1.25] text-foreground sm:text-5xl lg:text-6xl">
@@ -65,7 +65,7 @@ export default function Home() {
             </h1>
 
             <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              وجبات مطبوخة يومياً وموزونة بالغرام، توصيل داخل بغداد.
+              وجبات مطبوخة يومياً وموزونة بالغرام، توصيل داخل البصرة.
             </p>
 
             <div className="flex flex-wrap gap-3 pt-2">
@@ -78,43 +78,42 @@ export default function Home() {
               <Button
                 asChild
                 variant="outline"
-                className="h-12 rounded-md border-border bg-background/60 px-7 text-base font-extrabold text-foreground backdrop-blur transition-colors hover:border-primary/60 hover:bg-background/80"
+                className="h-12 rounded-md border-border bg-background/70 px-7 text-base font-extrabold text-foreground backdrop-blur transition-colors hover:border-primary/60 hover:bg-secondary"
               >
                 <Link to="/menu">تصفح وجبات الدكتور</Link>
               </Button>
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[380px] animate-fade-in lg:max-w-[440px]">
+          <div className="relative mx-auto w-full max-w-[360px] animate-fade-in lg:max-w-[420px]">
+            <span aria-hidden="true" className="absolute -inset-8 rounded-full bg-primary/10 blur-3xl" />
             <span
               aria-hidden="true"
-              className="absolute -inset-6 rounded-md bg-primary/10 blur-3xl"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-3 -left-3 h-24 w-24 rounded-md border-b-2 border-l-2 border-primary/50"
+              className="absolute -bottom-3 -left-3 h-24 w-24 rounded-md border-b-2 border-l-2 border-primary/60"
             />
             <span
               aria-hidden="true"
-              className="absolute -right-3 -top-3 h-24 w-24 rounded-md border-r-2 border-t-2 border-accent/50"
+              className="absolute -right-3 -top-3 h-24 w-24 rounded-md border-r-2 border-t-2 border-accent/40"
             />
-            <img
-              src={HERO_BRAND}
-              alt="شعار دكتور دايت — وجبات صحية محسوبة بدقة"
-              width={1122}
-              height={1402}
-              loading="eager"
-              className="relative w-full rounded-md border border-border object-contain shadow-[0_24px_70px_-30px_hsl(240_9%_0%/0.9)]"
-            />
+            <div className="relative flex aspect-square items-center justify-center rounded-md border border-border bg-card p-10 shadow-[0_28px_70px_-40px_hsl(219_62%_26%/0.55)]">
+              <img
+                src={BRAND_LOGO}
+                alt="شعار دكتور دايت — وجبات صحية محسوبة بدقة"
+                width={512}
+                height={512}
+                loading="eager"
+                className="w-full object-contain"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Stat strip */}
-      <section className="border-b border-border bg-card">
+      <section className="border-b border-border bg-sunken">
         <ul className="mx-auto grid max-w-[1400px] grid-cols-1 sm:grid-cols-3">
           {[
-            { icon: Truck, value: "توصيل يومي 6 أيام", label: "داخل بغداد وضواحيها" },
+            { icon: Truck, value: "توصيل يومي 6 أيام", label: "داخل البصرة وضواحيها" },
             { icon: ScanLine, value: "وجبات موزونة بالغرام", label: "ماكروز دقيقة لكل صحن" },
             { icon: Users, value: `+${formatNumber(BRAND_STATS.totalSubscribers)} مشترك`, label: "ثقوا بدكتور دايت" },
           ].map((stat) => (
@@ -199,7 +198,7 @@ export default function Home() {
           <ol className="grid gap-5 md:grid-cols-3">
             {STEPS.map((step, index) => (
               <li key={step.title} className="panel relative overflow-hidden p-6">
-                <span className="brand-latin absolute -left-2 -top-4 text-7xl text-foreground/[0.04]">
+                <span className="brand-latin absolute -left-2 -top-4 text-7xl text-foreground/[0.07]">
                   0{index + 1}
                 </span>
                 <step.icon className="mb-4 h-6 w-6 text-accent" />
@@ -213,7 +212,7 @@ export default function Home() {
 
       {/* Closing CTA */}
       <section className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6">
-        <div className="panel flex flex-col items-center gap-5 bg-gradient-to-l from-primary/10 via-card to-card p-10 text-center">
+        <div className="panel flex flex-col items-center gap-5 bg-gradient-to-l from-primary/[0.08] via-card to-accent/[0.06] p-10 text-center">
           <h2 className="max-w-2xl text-2xl font-black leading-relaxed text-foreground sm:text-3xl">
             جاهز تبدأ؟ احسب سعراتك واختر باقتك بأقل من دقيقتين.
           </h2>

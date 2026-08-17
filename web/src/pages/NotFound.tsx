@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 const NotFound = () => (
   <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center">
     <BrandMark />
-    <p className="brand-latin text-7xl text-foreground/10">404</p>
+    <p className="brand-latin text-7xl text-foreground/15">404</p>
     <h1 className="text-2xl font-black text-foreground">الصفحة غير موجودة</h1>
     <p className="max-w-md text-sm text-muted-foreground">
       الرابط الذي فتحته غير متوفر. رجاءً ارجع للرئيسية أو تصفح قائمة وجبات دكتور دايت.

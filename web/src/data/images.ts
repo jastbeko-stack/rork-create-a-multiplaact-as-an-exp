@@ -1,4 +1,7 @@
-/** Official دكتور دايت brand key visual used as the landing hero. */
+/** Official دكتور دايت monogram — navy DD with a leaf, used in the header, hero and admin. */
+export const BRAND_LOGO = "/dr-diet-logo.png";
+
+/** Secondary دكتور دايت brand key visual. */
 export const HERO_BRAND = "/dr-diet-brand.jpg";
 
 /** Generated photography used across دكتور دايت. */

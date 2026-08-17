@@ -270,13 +270,13 @@ export default function Checkout() {
 
               <div className="space-y-2">
                 <Label htmlFor="address" className="text-xs font-bold text-muted-foreground">
-                  العنوان داخل بغداد
+                  العنوان داخل البصرة
                 </Label>
                 <Input
                   id="address"
                   value={address}
                   onChange={(event) => setAddress(event.target.value)}
-                  placeholder="بغداد - المنصور - شارع 14"
+                  placeholder="البصرة - العشار - شارع الكورنيش"
                   className="h-11 border-border bg-sunken"
                   required
                 />
@@ -412,7 +412,7 @@ export default function Checkout() {
 
               <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
                 <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                الدفع عند الاستلام متاح داخل بغداد
+                الدفع عند الاستلام متاح داخل البصرة
               </p>
             </form>
           </section>

@@ -35,19 +35,19 @@ export function MealCard({ meal, quantity, onAdd, onRemove, className }: MealCar
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_70%_at_50%_40%,transparent_25%,hsl(240_9%_4%/0.75)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[hsl(219_62%_14%/0.45)] via-transparent to-[hsl(219_62%_14%/0.14)]" />
         <div className="absolute right-2 top-2 flex gap-1">
           {meal.goals.map((goal) => (
             <span
               key={goal}
-              className="rounded-sm border border-white/15 bg-background/70 px-2 py-0.5 text-[10px] font-bold text-foreground/90 backdrop-blur-sm"
+              className="rounded-sm border border-border bg-background/90 px-2 py-0.5 text-[10px] font-bold text-foreground backdrop-blur-sm"
             >
               {GOAL_LABELS[goal]}
             </span>
           ))}
         </div>
         {!meal.available && (
-          <span className="absolute inset-x-0 bottom-0 bg-destructive/85 py-1 text-center text-xs font-bold text-foreground">
+          <span className="absolute inset-x-0 bottom-0 bg-destructive/90 py-1 text-center text-xs font-bold text-destructive-foreground">
             غير متوفرة اليوم
           </span>
         )}

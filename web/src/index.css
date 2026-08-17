@@ -2,50 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-/* دكتور دايت design system — deep onyx canvas, emerald actions, gold protein highlights. */
+/* دكتور دايت design system — white canvas, navy (نيلي) typography, leaf-green actions. */
 
 @layer base {
   :root {
-    --background: 240 9% 4%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 100%;
+    --foreground: 219 60% 22%;
 
-    --card: 240 6% 10%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 219 60% 22%;
 
-    --popover: 240 8% 7%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 219 60% 22%;
 
-    --primary: 160 84% 39%;
-    --primary-foreground: 240 9% 4%;
+    --primary: 111 45% 36%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 6% 13%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 216 36% 96%;
+    --secondary-foreground: 219 60% 22%;
 
-    --muted: 240 8% 7%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 216 36% 96%;
+    --muted-foreground: 219 22% 46%;
 
-    --accent: 45 93% 47%;
-    --accent-foreground: 240 9% 4%;
+    --accent: 219 62% 26%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 47%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 160 84% 39%;
+    --border: 216 28% 88%;
+    --input: 216 28% 88%;
+    --ring: 111 45% 36%;
 
     --radius: 0.375rem;
 
-    --surface-sunken: 240 8% 7%;
+    --surface-sunken: 214 40% 97%;
 
-    --sidebar-background: 240 8% 6%;
-    --sidebar-foreground: 240 5% 65%;
-    --sidebar-primary: 45 93% 47%;
-    --sidebar-primary-foreground: 240 9% 4%;
-    --sidebar-accent: 240 6% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 4% 14%;
-    --sidebar-ring: 45 93% 47%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 219 22% 46%;
+    --sidebar-primary: 219 62% 26%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 40% 96%;
+    --sidebar-accent-foreground: 219 60% 22%;
+    --sidebar-border: 216 28% 90%;
+    --sidebar-ring: 219 62% 26%;
   }
 }
 
@@ -62,13 +62,14 @@
     @apply bg-background text-foreground antialiased;
     font-family: "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
     background-image:
-      radial-gradient(60rem 40rem at 90% -10%, hsl(160 84% 39% / 0.07), transparent 60%),
-      radial-gradient(50rem 35rem at 5% 8%, hsl(45 93% 47% / 0.04), transparent 60%);
+      radial-gradient(60rem 40rem at 92% -12%, hsl(219 62% 26% / 0.06), transparent 62%),
+      radial-gradient(50rem 35rem at 4% 6%, hsl(111 45% 36% / 0.05), transparent 62%);
     background-attachment: fixed;
   }
 
   ::selection {
-    background: hsl(160 84% 39% / 0.32);
+    background: hsl(219 62% 26% / 0.16);
+    color: hsl(219 62% 20%);
   }
 
   :focus-visible {
@@ -98,7 +99,7 @@
   }
 
   .panel {
-    @apply rounded-md border border-border bg-card;
+    @apply rounded-md border border-border bg-card shadow-[0_1px_2px_hsl(219_62%_26%/0.04)];
   }
 
   .hairline-grid > * + * {
@@ -107,12 +108,12 @@
 
   .cta-glow {
     box-shadow:
-      0 0 0 1px hsl(160 84% 45% / 0.5),
-      0 8px 30px -12px hsl(160 84% 39% / 0.65);
+      0 0 0 1px hsl(111 45% 30% / 0.35),
+      0 10px 26px -14px hsl(111 45% 26% / 0.75);
   }
 
   .noise-veil {
-    background-image: linear-gradient(180deg, transparent 0%, hsl(240 9% 4% / 0.35) 55%, hsl(240 9% 4%) 100%);
+    background-image: linear-gradient(180deg, transparent 0%, hsl(0 0% 100% / 0.55) 62%, hsl(0 0% 100%) 100%);
   }
 }
 
@@ -122,7 +123,7 @@
     height: 6px;
   }
   .scrollbar-slim::-webkit-scrollbar-thumb {
-    background: hsl(240 4% 20%);
+    background: hsl(216 22% 80%);
     border-radius: 999px;
   }
 }

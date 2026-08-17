@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { BrandMark } from "@/components/BrandMark";
 
-/** Shared footer with contact details for the Baghdad kitchen. */
+/** Shared footer with contact details for the Basra kitchen. */
 export function SiteFooter() {
   return (
     <footer className="mt-20 border-t border-border bg-sunken">
@@ -11,7 +11,7 @@ export function SiteFooter() {
         <div className="space-y-3">
           <BrandMark />
           <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-            مطبخ دكتور دايت يطبخ وجباتك يومياً ويوزنها بالغرام حسب هدفك، ويوصلها لباب بيتك داخل بغداد.
+            مطبخ دكتور دايت يطبخ وجباتك يومياً ويوزنها بالغرام حسب هدفك، ويوصلها لباب بيتك داخل البصرة.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export function SiteFooter() {
             </li>
             <li className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-primary" />
-              بغداد — المنصور، شارع 14
+              البصرة — العشار، شارع الكورنيش
             </li>
             <li className="flex items-center gap-2">
               <Instagram className="h-4 w-4 text-primary" />

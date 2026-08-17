@@ -195,7 +195,7 @@ export default function AdminLogin() {
         </div>
 
         <p className="text-center text-[11px] text-muted-foreground/70">
-          © {new Date().getFullYear()} دكتور دايت — بغداد، العراق
+          © {new Date().getFullYear()} دكتور دايت — البصرة، العراق
         </p>
       </div>
 
@@ -205,13 +205,13 @@ export default function AdminLogin() {
           src={HERO_ATHLETE}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-center opacity-55"
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-30"
         />
-        <div className="absolute inset-0 bg-gradient-to-l from-background via-background/40 to-background/85" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-l from-background via-background/70 to-background/92" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
 
         <div className="relative flex h-full flex-col justify-end gap-6 p-12">
-          <p className="brand-latin text-5xl leading-none text-foreground/90 xl:text-6xl">
+          <p className="brand-latin text-5xl leading-none text-foreground xl:text-6xl">
             TRAIN HARD.
             <br />
             <span className="text-primary">EAT SMART.</span>
