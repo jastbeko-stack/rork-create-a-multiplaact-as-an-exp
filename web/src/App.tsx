@@ -1,11 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
+import { RequireAdmin } from "@/components/RequireAdmin";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DrDietProvider } from "@/store/DrDietStore";
 
 import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
 import Checkout from "./pages/Checkout";
 import Home from "./pages/Home";
 import MenuPage from "./pages/Menu";
@@ -25,7 +27,15 @@ const App = () => (
             <Route path="/menu" element={<MenuPage />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/subscription" element={<MySubscription />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/admin"
+              element={
+                <RequireAdmin>
+                  <Admin />
+                </RequireAdmin>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

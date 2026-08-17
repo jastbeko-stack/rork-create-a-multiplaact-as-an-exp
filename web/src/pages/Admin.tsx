@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ClipboardList,
   LayoutDashboard,
+  LogOut,
   Save,
   Search,
   Trash2,
@@ -13,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { SiteLayout } from "@/components/SiteLayout";
@@ -51,8 +53,24 @@ function statusOf(subscriber: Subscriber): SubscriptionStatus {
 }
 
 export default function Admin() {
-  const { subscribers, addSubscriber, removeSubscriber, orders, meals, toggleMealAvailability } = useDrDiet();
+  const {
+    subscribers,
+    addSubscriber,
+    removeSubscriber,
+    orders,
+    meals,
+    toggleMealAvailability,
+    adminUser,
+    signOutAdmin,
+  } = useDrDiet();
+  const navigate = useNavigate();
   const [section, setSection] = useState<Section>("subscribers");
+
+  const handleSignOut = () => {
+    signOutAdmin();
+    toast.success("تم تسجيل الخروج", { description: "انتهت جلسة لوحة التحكم." });
+    navigate("/admin/login", { replace: true });
+  };
 
   const [search, setSearch] = useState<string>("");
   const [goalFilter, setGoalFilter] = useState<string>("all");
@@ -562,6 +580,17 @@ export default function Admin() {
 
           {/* Right-pinned admin sidebar */}
           <nav className="panel h-fit p-2 lg:sticky lg:top-24 lg:order-2" aria-label="أقسام لوحة التحكم">
+            <div className="mb-2 hidden items-center gap-2.5 rounded-md bg-sunken px-3 py-3 lg:flex">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-accent/15 text-xs font-black text-accent">
+                DR
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-xs font-extrabold text-foreground">
+                  {adminUser ?? "dr.diet"}
+                </span>
+                <span className="block text-[10px] font-bold text-muted-foreground">مدير النظام</span>
+              </span>
+            </div>
             <ul className="flex gap-1 overflow-x-auto scrollbar-slim lg:block lg:space-y-1 lg:overflow-visible">
               {SECTIONS.map((item) => {
                 const active = section === item.id;
@@ -584,6 +613,16 @@ export default function Admin() {
                   </li>
                 );
               })}
+              <li className="lg:pt-1">
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-3 whitespace-nowrap rounded-md px-3 py-2.5 text-sm font-bold text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <LogOut className="h-4 w-4 shrink-0" />
+                  تسجيل الخروج
+                </button>
+              </li>
             </ul>
           </nav>
         </div>

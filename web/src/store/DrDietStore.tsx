@@ -5,6 +5,11 @@ import { SEED_SUBSCRIBERS } from "@/data/subscribers";
 import type { CartLine, Meal, Order, Subscriber } from "@/types";
 
 const STORAGE_KEY = "dr-diet-state-v1";
+const ADMIN_SESSION_KEY = "dr-diet-admin-session-v1";
+
+/** Credentials for the دكتور دايت admin console. */
+const ADMIN_USERNAME = "dr.diet";
+const ADMIN_PASSWORD = "2254359";
 
 interface PersistedState {
   cart: CartLine[];
@@ -33,6 +38,10 @@ interface DrDietValue {
   mySubscription: Subscriber | null;
   setMySubscriptionId: (id: string | null) => void;
   toggleMealAvailability: (mealId: string) => void;
+  isAdminAuthed: boolean;
+  adminUser: string | null;
+  signInAdmin: (username: string, password: string) => boolean;
+  signOutAdmin: () => void;
 }
 
 const DrDietContext = createContext<DrDietValue | null>(null);
@@ -56,6 +65,14 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<Order[]>(persisted.orders ?? []);
   const [mySubscriptionId, setMySubscriptionId] = useState<string | null>(persisted.mySubscriptionId ?? null);
   const [unavailableMealIds, setUnavailableMealIds] = useState<string[]>(persisted.unavailableMealIds ?? []);
+  const [adminUser, setAdminUser] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return window.sessionStorage.getItem(ADMIN_SESSION_KEY);
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     try {
@@ -144,6 +161,27 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const signInAdmin = useCallback((username: string, password: string) => {
+    const isValid = username.trim().toLowerCase() === ADMIN_USERNAME && password === ADMIN_PASSWORD;
+    if (!isValid) return false;
+    setAdminUser(ADMIN_USERNAME);
+    try {
+      window.sessionStorage.setItem(ADMIN_SESSION_KEY, ADMIN_USERNAME);
+    } catch {
+      /* session storage unavailable — auth stays in memory */
+    }
+    return true;
+  }, []);
+
+  const signOutAdmin = useCallback(() => {
+    setAdminUser(null);
+    try {
+      window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    } catch {
+      /* nothing to clear */
+    }
+  }, []);
+
   const mySubscription = useMemo(
     () => subscribers.find((subscriber) => subscriber.id === mySubscriptionId) ?? null,
     [subscribers, mySubscriptionId],
@@ -169,6 +207,10 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
       mySubscription,
       setMySubscriptionId,
       toggleMealAvailability,
+      isAdminAuthed: adminUser !== null,
+      adminUser,
+      signInAdmin,
+      signOutAdmin,
     }),
     [
       meals,
@@ -188,6 +230,9 @@ export function DrDietProvider({ children }: { children: ReactNode }) {
       addOrder,
       mySubscription,
       toggleMealAvailability,
+      adminUser,
+      signInAdmin,
+      signOutAdmin,
     ],
   );
 

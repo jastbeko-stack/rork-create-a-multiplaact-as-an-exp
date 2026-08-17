@@ -90,6 +90,13 @@ export default {
           from: { opacity: "0", transform: "translateY(100%)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-7px)" },
+          "40%": { transform: "translateX(7px)" },
+          "60%": { transform: "translateX(-4px)" },
+          "80%": { transform: "translateX(4px)" },
+        },
         "count-pulse": {
           "0%": { transform: "scale(1)" },
           "45%": { transform: "scale(1.14)" },
@@ -103,6 +110,7 @@ export default {
         "fade-in": "fade-in 0.6s ease-out both",
         "slide-up-bar": "slide-up-bar 0.35s cubic-bezier(0.16, 1, 0.3, 1) both",
         "count-pulse": "count-pulse 0.35s ease-out",
+        shake: "shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97)",
       },
     },
   },
