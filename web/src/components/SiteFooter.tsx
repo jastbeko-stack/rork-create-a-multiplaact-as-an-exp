@@ -2,6 +2,7 @@ import { Instagram, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { BrandMark } from "@/components/BrandMark";
+import { WHATSAPP_NUMBER } from "@/lib/whatsapp";
 
 /** Shared footer with contact details for the Basra kitchen. */
 export function SiteFooter() {
@@ -44,15 +45,22 @@ export function SiteFooter() {
         <div className="space-y-3 text-sm">
           <h3 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">تواصل معنا</h3>
           <ul className="space-y-2 text-foreground/80">
-            <li className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-primary" />
-              <span className="tnum" dir="ltr">
-                +964 770 123 4567
-              </span>
+            <li>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 transition-colors hover:text-primary"
+              >
+                <Phone className="h-4 w-4 text-primary" />
+                <span className="tnum" dir="ltr">
+                  +964 772 201 7005
+                </span>
+              </a>
             </li>
-            <li className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" />
-              البصرة — العشار، شارع الكورنيش
+            <li className="flex items-start gap-2">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              البصرة — حي الأساتذة، الأربع شوارع
             </li>
             <li className="flex items-center gap-2">
               <Instagram className="h-4 w-4 text-primary" />

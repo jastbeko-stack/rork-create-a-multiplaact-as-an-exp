@@ -304,7 +304,7 @@ export default function Checkout() {
                   id="address"
                   value={address}
                   onChange={(event) => setAddress(event.target.value)}
-                  placeholder="البصرة - العشار - شارع الكورنيش"
+                  placeholder="البصرة - حي الأساتذة - الأربع شوارع"
                   className="h-11 border-border bg-sunken"
                   required
                 />
