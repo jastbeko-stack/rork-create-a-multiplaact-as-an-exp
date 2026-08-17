@@ -45,12 +45,20 @@ export interface Order {
   address: string;
   deliveryWindow: string;
   meals: { name: string; quantity: number; price: number }[];
+  /** Number of meals delivered each day. */
+  mealsPerDay: number;
+  /** Cost of a single day of meals, before delivery. */
+  dailyTotal: number;
+  /** Meals cost across the whole subscription period. */
   mealsTotal: number;
   deliveryFee: number;
   total: number;
   createdAt: string;
   plan: SubscriberGoal;
-  durationMonths: number;
+  /** Subscription length in days (1, 30, 60...). */
+  durationDays: number;
+  /** Human label for the period, e.g. "شهر — 30 يوم". */
+  durationLabel: string;
 }
 
 export interface MacroResult {

@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DELIVERY_FEE } from "@/data/meals";
-import { addMonths, formatIQD, formatNumber, toISODate } from "@/lib/format";
+import { addDays, formatIQD, formatNumber, toISODate } from "@/lib/format";
 import { ACTIVITY_LEVELS, calculateMacros, type CalculatorGoal } from "@/lib/macros";
 import { cn } from "@/lib/utils";
 import { openWhatsAppOrder } from "@/lib/whatsapp";
@@ -23,7 +23,27 @@ import { useDrDiet } from "@/store/DrDietStore";
 
 const GOALS: CalculatorGoal[] = ["تضخيم", "تثبيت", "تنشيف"];
 const DELIVERY_WINDOWS = ["10:00 - 12:00 صباحاً", "2:00 - 4:00 عصراً", "6:00 - 8:00 مساءً", "8:00 - 10:00 مساءً"];
-const DURATIONS = [1, 2, 3, 6];
+interface DurationOption {
+  /** Length of the subscription in days. */
+  days: number;
+  label: string;
+  hint: string;
+}
+
+/** Free delivery kicks in for subscriptions of a month or longer. */
+const FREE_DELIVERY_FROM_DAYS = 30;
+
+const DURATION_OPTIONS: DurationOption[] = [
+  { days: 1, label: "يوم واحد", hint: "تجربة" },
+  { days: 30, label: "شهر", hint: "30 يوم" },
+  { days: 60, label: "شهرين", hint: "60 يوم" },
+];
+
+/** Delivery charge for a whole period (free for monthly plans). */
+function deliveryFor(days: number, hasMeals: boolean): number {
+  if (!hasMeals) return 0;
+  return days >= FREE_DELIVERY_FROM_DAYS ? 0 : DELIVERY_FEE * days;
+}
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -41,7 +61,7 @@ export default function Checkout() {
   const [phone, setPhone] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [window_, setWindow_] = useState<string>(DELIVERY_WINDOWS[2]);
-  const [duration, setDuration] = useState<string>("1");
+  const [durationDays, setDurationDays] = useState<number>(30);
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const macros = useMemo(
@@ -57,7 +77,15 @@ export default function Checkout() {
     [weight, height, age, goal, gender, activity],
   );
 
-  const total = cartTotal + (cartCount > 0 ? DELIVERY_FEE : 0);
+  const selectedDuration =
+    DURATION_OPTIONS.find((option) => option.days === durationDays) ?? DURATION_OPTIONS[1];
+  const durationLabel = `${selectedDuration.label} — ${selectedDuration.days} يوم`;
+
+  /** cartTotal is the cost of one day of meals; the period multiplies it. */
+  const dailyTotal = cartTotal;
+  const mealsTotal = dailyTotal * durationDays;
+  const deliveryTotal = deliveryFor(durationDays, cartCount > 0);
+  const total = mealsTotal + deliveryTotal;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -72,7 +100,6 @@ export default function Checkout() {
 
     setSubmitting(true);
     const startDate = toISODate(new Date());
-    const months = Number(duration);
     const orderMeals = cartDetails.map((entry) => ({
       name: entry.meal.name,
       quantity: entry.quantity,
@@ -84,10 +111,13 @@ export default function Checkout() {
       phone: phone.trim(),
       address: address.trim(),
       deliveryWindow: window_,
-      durationMonths: months,
+      durationLabel,
+      durationDays,
+      mealsPerDay: cartCount,
       meals: orderMeals,
-      mealsTotal: cartTotal,
-      deliveryFee: DELIVERY_FEE,
+      dailyTotal,
+      mealsTotal,
+      deliveryFee: deliveryTotal,
       total,
       macros,
       body: {
@@ -107,8 +137,8 @@ export default function Checkout() {
       weightKg: Number(weight) || 75,
       goal,
       startDate,
-      endDate: addMonths(startDate, months),
-      mealsPerDay: macros.mealsPerDay,
+      endDate: addDays(startDate, durationDays),
+      mealsPerDay: cartCount,
     });
 
     addOrder({
@@ -117,17 +147,20 @@ export default function Checkout() {
       address: address.trim(),
       deliveryWindow: window_,
       meals: orderMeals,
-      mealsTotal: cartTotal,
-      deliveryFee: DELIVERY_FEE,
+      mealsPerDay: cartCount,
+      dailyTotal,
+      mealsTotal,
+      deliveryFee: deliveryTotal,
       total,
       plan: goal,
-      durationMonths: months,
+      durationDays,
+      durationLabel,
     });
 
     setMySubscriptionId(subscriber.id);
     clearCart();
     toast.success("تم تأكيد اشتراكك — افتح الواتساب وأرسل الطلب", {
-      description: `${macros.planLabel} — ${months} شهر — ${formatIQD(total)}`,
+      description: `${macros.planLabel} — ${durationLabel} — ${formatIQD(total)}`,
     });
     setSubmitting(false);
     navigate("/subscription");
@@ -310,37 +343,62 @@ export default function Checkout() {
                 />
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-muted-foreground">وقت التوصيل المفضل</Label>
-                  <Select value={window_} onValueChange={setWindow_}>
-                    <SelectTrigger className="h-11 border-border bg-sunken text-sm font-bold">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="border-border bg-popover">
-                      {DELIVERY_WINDOWS.map((option) => (
-                        <SelectItem key={option} value={option} className="text-sm">
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold text-muted-foreground">وقت التوصيل المفضل</Label>
+                <Select value={window_} onValueChange={setWindow_}>
+                  <SelectTrigger className="h-11 border-border bg-sunken text-sm font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border-border bg-popover">
+                    {DELIVERY_WINDOWS.map((option) => (
+                      <SelectItem key={option} value={option} className="text-sm">
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-muted-foreground">مدة الاشتراك</Label>
-                  <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger className="h-11 border-border bg-sunken text-sm font-bold">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="border-border bg-popover">
-                      {DURATIONS.map((months) => (
-                        <SelectItem key={months} value={String(months)} className="text-sm">
-                          {months} شهر
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold text-muted-foreground">مدة الاشتراك</Label>
+                <div className="grid grid-cols-3 gap-2" role="group" aria-label="مدة الاشتراك">
+                  {DURATION_OPTIONS.map((option) => {
+                    const optionTotal =
+                      dailyTotal * option.days + deliveryFor(option.days, cartCount > 0);
+                    const isActive = option.days === durationDays;
+                    return (
+                      <button
+                        key={option.days}
+                        type="button"
+                        onClick={() => setDurationDays(option.days)}
+                        aria-pressed={isActive}
+                        className={cn(
+                          "flex flex-col items-center gap-1 rounded-md border px-2 py-3 transition-all active:scale-95",
+                          isActive
+                            ? "border-primary bg-primary/10 shadow-[0_0_0_1px_hsl(var(--primary))]"
+                            : "border-border bg-sunken hover:border-primary/50",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "text-sm font-extrabold",
+                            isActive ? "text-primary" : "text-foreground",
+                          )}
+                        >
+                          {option.label}
+                        </span>
+                        <span className="tnum text-[10px] text-muted-foreground">{option.hint}</span>
+                        <span
+                          className={cn(
+                            "tnum text-xs font-extrabold",
+                            isActive ? "text-primary" : "text-muted-foreground",
+                          )}
+                        >
+                          {cartCount > 0 ? formatIQD(optionTotal) : "—"}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -416,15 +474,31 @@ export default function Checkout() {
               {/* Totals */}
               <dl className="rounded-md border border-border bg-sunken text-sm">
                 <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                  <dt className="text-muted-foreground">الوجبات ({cartCount})</dt>
-                  <dd className="tnum font-bold text-foreground">{formatIQD(cartTotal)}</dd>
+                  <dt className="text-muted-foreground">سعر اليوم الواحد ({cartCount} وجبة)</dt>
+                  <dd className="tnum font-bold text-foreground">{formatIQD(dailyTotal)}</dd>
+                </div>
+                <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                  <dt className="text-muted-foreground">
+                    الوجبات × {selectedDuration.days} يوم
+                  </dt>
+                  <dd className="tnum font-bold text-foreground">{formatIQD(mealsTotal)}</dd>
                 </div>
                 <div className="flex items-center justify-between border-b border-border px-4 py-3">
                   <dt className="text-muted-foreground">التوصيل</dt>
-                  <dd className="tnum font-bold text-foreground">{formatIQD(cartCount > 0 ? DELIVERY_FEE : 0)}</dd>
+                  <dd
+                    className={cn(
+                      "tnum font-bold",
+                      deliveryTotal === 0 && cartCount > 0 ? "text-primary" : "text-foreground",
+                    )}
+                  >
+                    {cartCount > 0 && deliveryTotal === 0 ? "مجاناً" : formatIQD(deliveryTotal)}
+                  </dd>
                 </div>
                 <div className="flex items-center justify-between px-4 py-4">
-                  <dt className="text-base font-extrabold text-foreground">المجموع</dt>
+                  <div>
+                    <dt className="text-base font-extrabold text-foreground">المجموع</dt>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">{durationLabel}</p>
+                  </div>
                   <dd className="tnum text-2xl font-extrabold text-primary">{formatIQD(total)}</dd>
                 </div>
               </dl>

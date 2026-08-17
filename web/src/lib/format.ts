@@ -16,6 +16,13 @@ export function toISODate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/** Adds whole days to an ISO date string. */
+export function addDays(isoDate: string, days: number): string {
+  const date = new Date(`${isoDate}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  return toISODate(date);
+}
+
 /** Adds whole months to an ISO date string. */
 export function addMonths(isoDate: string, months: number): string {
   const date = new Date(`${isoDate}T00:00:00`);

@@ -9,8 +9,13 @@ export interface WhatsAppOrderPayload {
   phone: string;
   address: string;
   deliveryWindow: string;
-  durationMonths: number;
+  durationLabel: string;
+  durationDays: number;
+  mealsPerDay: number;
   meals: { name: string; quantity: number; price: number }[];
+  /** Cost of a single day of meals. */
+  dailyTotal: number;
+  /** Meals cost across the whole period. */
   mealsTotal: number;
   deliveryFee: number;
   total: number;
@@ -33,15 +38,16 @@ export function buildOrderMessage(order: WhatsAppOrderPayload): string {
   lines.push(`• رقم الهاتف: ${order.phone}`);
   lines.push(`• العنوان: ${order.address}`);
   lines.push(`• وقت التوصيل المفضل: ${order.deliveryWindow}`);
-  lines.push(`• مدة الاشتراك: ${order.durationMonths} شهر`);
+  lines.push(`• مدة الاشتراك: ${order.durationLabel}`);
   lines.push("");
 
-  lines.push("🍽️ *الوجبات المختارة*");
+  lines.push(`🍽️ *الوجبات اليومية (${order.mealsPerDay} وجبة باليوم)*`);
   order.meals.forEach((meal, index) => {
     lines.push(
       `${index + 1}. ${meal.name} × ${meal.quantity} = ${formatIQD(meal.price * meal.quantity)}`,
     );
   });
+  lines.push(`▪️ سعر اليوم الواحد: ${formatIQD(order.dailyTotal)}`);
   lines.push("");
 
   lines.push("📊 *تفاصيل الماكروز اليومية*");
@@ -59,8 +65,10 @@ export function buildOrderMessage(order: WhatsAppOrderPayload): string {
   lines.push("");
 
   lines.push("💰 *الفاتورة*");
-  lines.push(`• الوجبات: ${formatIQD(order.mealsTotal)}`);
-  lines.push(`• التوصيل: ${formatIQD(order.deliveryFee)}`);
+  lines.push(
+    `• الوجبات: ${formatIQD(order.dailyTotal)} × ${order.durationDays} يوم = ${formatIQD(order.mealsTotal)}`,
+  );
+  lines.push(`• التوصيل: ${order.deliveryFee === 0 ? "مجاناً" : formatIQD(order.deliveryFee)}`);
   lines.push(`• *المجموع الكلي: ${formatIQD(order.total)} (IQD)*`);
   lines.push("————————————————");
   lines.push("✅ يرجى تأكيد الطلب وتحديد موعد أول توصيل.");

@@ -616,10 +616,13 @@ export default function Admin() {
                           <span className="tnum text-lg font-extrabold text-primary">{formatIQD(order.total)}</span>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {order.address} — {order.deliveryWindow} · {order.plan} · {order.durationMonths} شهر
+                          {order.address} — {order.deliveryWindow} · {order.plan} · {order.durationLabel}
                         </p>
                         <p className="text-xs text-foreground/70">
                           {order.meals.map((line) => `${line.name} ×${line.quantity}`).join("، ")}
+                        </p>
+                        <p className="tnum text-xs text-muted-foreground">
+                          {formatIQD(order.dailyTotal)} / اليوم × {order.durationDays} يوم
                         </p>
                       </li>
                     ))}
