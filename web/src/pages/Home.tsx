@@ -7,7 +7,7 @@ import { MealCard } from "@/components/MealCard";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { GOAL_LABELS, GOAL_ORDER } from "@/data/meals";
-import { HERO_ATHLETE } from "@/data/images";
+import { HERO_BRAND } from "@/data/images";
 import { BRAND_STATS } from "@/data/subscribers";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -45,16 +45,15 @@ export default function Home() {
     <SiteLayout>
       {/* Hero */}
       <section className="relative isolate overflow-hidden border-b border-border">
-        <img
-          src={HERO_ATHLETE}
-          alt="لاعب كمال أجسام أثناء التمرين"
-          className="absolute inset-0 h-full w-full object-cover object-center"
+        {/* Ambient wash sampled from the brand key visual */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(45rem_32rem_at_28%_18%,hsl(160_84%_39%/0.16),transparent_65%),radial-gradient(40rem_30rem_at_85%_85%,hsl(219_63%_28%/0.35),transparent_65%)]"
         />
-        <div className="absolute inset-0 bg-gradient-to-l from-background via-background/85 to-background/10" />
-        <div className="absolute inset-0 noise-veil" />
+        <div aria-hidden="true" className="absolute inset-0 noise-veil" />
 
-        <div className="relative mx-auto flex min-h-[560px] max-w-[1400px] items-center px-4 py-20 sm:px-6 lg:min-h-[640px]">
-          <div className="max-w-2xl animate-rise-in space-y-6">
+        <div className="relative mx-auto grid min-h-[560px] max-w-[1400px] items-center gap-10 px-4 py-16 sm:px-6 lg:min-h-[660px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:py-20">
+          <div className="animate-rise-in space-y-6">
             <span className="inline-flex items-center gap-2 rounded-sm border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-extrabold text-primary">
               <Utensils className="h-3.5 w-3.5" />
               مطبخ دكتور دايت — بغداد
@@ -84,6 +83,29 @@ export default function Home() {
                 <Link to="/menu">تصفح وجبات الدكتور</Link>
               </Button>
             </div>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-[380px] animate-fade-in lg:max-w-[440px]">
+            <span
+              aria-hidden="true"
+              className="absolute -inset-6 rounded-md bg-primary/10 blur-3xl"
+            />
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-3 -left-3 h-24 w-24 rounded-md border-b-2 border-l-2 border-primary/50"
+            />
+            <span
+              aria-hidden="true"
+              className="absolute -right-3 -top-3 h-24 w-24 rounded-md border-r-2 border-t-2 border-accent/50"
+            />
+            <img
+              src={HERO_BRAND}
+              alt="شعار دكتور دايت — وجبات صحية محسوبة بدقة"
+              width={1122}
+              height={1402}
+              loading="eager"
+              className="relative w-full rounded-md border border-border object-contain shadow-[0_24px_70px_-30px_hsl(240_9%_0%/0.9)]"
+            />
           </div>
         </div>
       </section>

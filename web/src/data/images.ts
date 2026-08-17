@@ -1,3 +1,6 @@
+/** Official دكتور دايت brand key visual used as the landing hero. */
+export const HERO_BRAND = "/dr-diet-brand.jpg";
+
 /** Generated photography used across دكتور دايت. */
 export const HERO_ATHLETE =
   "https://r2-pub.rork.com/projects/mctrxl9s9p1p8tosniehg/assets/dc86be06-ec44-48b5-bf6c-e38d9dc50089.png";
