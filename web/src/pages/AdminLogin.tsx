@@ -1,5 +1,5 @@
 import { Eye, EyeOff, KeyRound, Loader2, Lock, ShieldCheck, TriangleAlert, User } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HERO_ATHLETE } from "@/data/images";
-import { BRAND_STATS } from "@/data/subscribers";
-import { formatNumber } from "@/lib/format";
+import { daysUntil, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useDrDiet } from "@/store/DrDietStore";
 
@@ -17,7 +16,12 @@ const MAX_ATTEMPTS = 5;
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const { signInAdmin, isAdminAuthed } = useDrDiet();
+  const { signInAdmin, isAdminAuthed, subscribers, orders } = useDrDiet();
+
+  const activeCount = useMemo(
+    () => subscribers.filter((subscriber) => daysUntil(subscriber.endDate) >= 0).length,
+    [subscribers],
+  );
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -222,9 +226,9 @@ export default function AdminLogin() {
 
           <div className="grid max-w-md grid-cols-3 gap-px overflow-hidden rounded-md border border-border bg-border">
             {[
-              { value: formatNumber(BRAND_STATS.totalSubscribers), label: "مشترك" },
-              { value: formatNumber(BRAND_STATS.activeSubscriptions), label: "اشتراك نشط" },
-              { value: `+${formatNumber(BRAND_STATS.weeklyGrowth)}`, label: "نمو أسبوعي" },
+              { value: formatNumber(subscribers.length), label: "مشترك" },
+              { value: formatNumber(activeCount), label: "اشتراك نشط" },
+              { value: formatNumber(orders.length), label: "طلب مسجل" },
             ].map((stat) => (
               <div key={stat.label} className="bg-card px-4 py-4 text-center">
                 <p className="tnum text-xl font-black text-accent">{stat.value}</p>

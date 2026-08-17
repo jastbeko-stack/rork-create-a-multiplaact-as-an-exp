@@ -42,8 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { BRAND_STATS } from "@/data/subscribers";
-import { addMonths, daysUntil, formatIQD, formatNumber, toISODate } from "@/lib/format";
+import { addDays, daysUntil, formatIQD, formatNumber, toISODate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useDrDiet, type MealDraft } from "@/store/DrDietStore";
 import type { Meal, Subscriber, SubscriberGoal, SubscriptionStatus } from "@/types";
@@ -60,6 +59,13 @@ const SECTIONS: { id: Section; label: string; icon: typeof Users }[] = [
 
 const GOALS: SubscriberGoal[] = ["تضخيم", "تنشيف", "إنقاص وزن", "تثبيت"];
 const PAGE_SIZE = 6;
+
+/** Same subscription lengths offered to customers on the checkout page. */
+const DURATION_OPTIONS: { days: number; label: string }[] = [
+  { days: 1, label: "يوم واحد" },
+  { days: 30, label: "شهر (30 يوم)" },
+  { days: 60, label: "شهرين (60 يوم)" },
+];
 
 function statusOf(subscriber: Subscriber): SubscriptionStatus {
   return daysUntil(subscriber.endDate) >= 0 ? "نشط" : "منتهي";
@@ -122,11 +128,21 @@ export default function Admin() {
     weightKg: "",
     goal: "تضخيم" as SubscriberGoal,
     startDate: toISODate(new Date()),
-    months: "1",
+    durationDays: "30",
   });
 
   const activeCount = useMemo(
     () => subscribers.filter((subscriber) => statusOf(subscriber) === "نشط").length,
+    [subscribers],
+  );
+
+  /** Subscribers whose subscription started within the last 7 days. */
+  const newThisWeek = useMemo(
+    () =>
+      subscribers.filter((subscriber) => {
+        const elapsed = -daysUntil(subscriber.startDate);
+        return elapsed >= 0 && elapsed <= 7;
+      }).length,
     [subscribers],
   );
 
@@ -159,7 +175,7 @@ export default function Admin() {
       toast.error("بيانات ناقصة", { description: "الاسم الكامل ورقم الهاتف مطلوبان." });
       return;
     }
-    const months = Number(form.months) || 1;
+    const days = Number(form.durationDays) || 30;
     addSubscriber({
       name: form.name.trim(),
       phone: form.phone.trim(),
@@ -168,7 +184,7 @@ export default function Admin() {
       weightKg: Number(form.weightKg) || 75,
       goal: form.goal,
       startDate: form.startDate,
-      endDate: addMonths(form.startDate, months),
+      endDate: addDays(form.startDate, days),
       mealsPerDay: form.goal === "تضخيم" ? 3 : 2,
     });
     toast.success("تمت إضافة المشترك", { description: form.name.trim() });
@@ -199,6 +215,7 @@ export default function Admin() {
                 activeCount={activeCount}
                 expiringCount={expiringCount}
                 totalCount={subscribers.length}
+                newThisWeek={newThisWeek}
                 subscribers={subscribers}
                 ordersRevenue={ordersRevenue}
                 ordersCount={orders.length}
@@ -207,7 +224,12 @@ export default function Admin() {
 
             {section === "subscribers" && (
               <>
-                <StatCards activeCount={activeCount} expiringCount={expiringCount} totalCount={subscribers.length} />
+                <StatCards
+                  activeCount={activeCount}
+                  expiringCount={expiringCount}
+                  totalCount={subscribers.length}
+                  newThisWeek={newThisWeek}
+                />
 
                 <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
                   <section className="panel overflow-hidden">
@@ -285,7 +307,9 @@ export default function Admin() {
                           {visible.length === 0 ? (
                             <tr>
                               <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">
-                                ما كو مشترك يطابق البحث الحالي.
+                                {subscribers.length === 0
+                                  ? "ما كو مشتركين بعد — أي تسجيل من الموقع راح يظهر هنا مباشرة."
+                                  : "ما كو مشترك يطابق البحث الحالي."}
                               </td>
                             </tr>
                           ) : (
@@ -480,16 +504,16 @@ export default function Admin() {
                       <div className="space-y-1.5">
                         <Label className="text-xs font-bold text-muted-foreground">مدة الاشتراك</Label>
                         <Select
-                          value={form.months}
-                          onValueChange={(value) => setForm((prev) => ({ ...prev, months: value }))}
+                          value={form.durationDays}
+                          onValueChange={(value) => setForm((prev) => ({ ...prev, durationDays: value }))}
                         >
                           <SelectTrigger className="h-10 border-border bg-sunken text-sm font-bold">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="border-border bg-popover">
-                            {[1, 2, 3, 6].map((months) => (
-                              <SelectItem key={months} value={String(months)}>
-                                {months} شهر
+                            {DURATION_OPTIONS.map((option) => (
+                              <SelectItem key={option.days} value={String(option.days)}>
+                                {option.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -768,32 +792,37 @@ function StatCards({
   activeCount,
   expiringCount,
   totalCount,
+  newThisWeek,
 }: {
   activeCount: number;
   expiringCount: number;
   totalCount: number;
+  newThisWeek: number;
 }) {
   const cards = [
     {
       icon: Users,
       label: "إجمالي مشتركي دكتور دايت",
-      value: formatNumber(BRAND_STATS.totalSubscribers + totalCount),
-      delta: `+${BRAND_STATS.weeklyGrowth} من الأسبوع الماضي`,
-      positive: true,
+      value: formatNumber(totalCount),
+      delta: newThisWeek > 0 ? `+${formatNumber(newThisWeek)} خلال هذا الأسبوع` : "ما كو تسجيل جديد هذا الأسبوع",
+      positive: newThisWeek > 0,
     },
     {
       icon: Activity,
       label: "الاشتراكات النشطة",
-      value: formatNumber(BRAND_STATS.activeSubscriptions + activeCount),
-      delta: `+${BRAND_STATS.activeGrowth} من الأسبوع الماضي`,
-      positive: true,
+      value: formatNumber(activeCount),
+      delta:
+        totalCount === 0
+          ? "بانتظار أول مشترك"
+          : `${formatNumber(activeCount)} من ${formatNumber(totalCount)} ملف`,
+      positive: activeCount > 0,
     },
     {
       icon: CalendarClock,
       label: "اشتراكات تنتهي هذا الأسبوع",
       value: formatNumber(expiringCount),
-      delta: `${BRAND_STATS.expiringChange} من الأسبوع الماضي`,
-      positive: false,
+      delta: expiringCount === 0 ? "ما كو اشتراك ينتهي قريباً" : "تحتاج متابعة تجديد",
+      positive: expiringCount === 0,
     },
   ];
 
@@ -819,6 +848,7 @@ function OverviewSection({
   activeCount,
   expiringCount,
   totalCount,
+  newThisWeek,
   subscribers,
   ordersRevenue,
   ordersCount,
@@ -826,6 +856,7 @@ function OverviewSection({
   activeCount: number;
   expiringCount: number;
   totalCount: number;
+  newThisWeek: number;
   subscribers: Subscriber[];
   ordersRevenue: number;
   ordersCount: number;
@@ -840,7 +871,12 @@ function OverviewSection({
 
   return (
     <div className="space-y-6">
-      <StatCards activeCount={activeCount} expiringCount={expiringCount} totalCount={totalCount} />
+      <StatCards
+        activeCount={activeCount}
+        expiringCount={expiringCount}
+        totalCount={totalCount}
+        newThisWeek={newThisWeek}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         <section className="panel p-5">

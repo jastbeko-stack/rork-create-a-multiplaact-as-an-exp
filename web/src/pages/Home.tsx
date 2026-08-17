@@ -8,7 +8,6 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { GOAL_LABELS, GOAL_ORDER } from "@/data/meals";
 import { BRAND_LOGO } from "@/data/images";
-import { BRAND_STATS } from "@/data/subscribers";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useDrDiet } from "@/store/DrDietStore";
@@ -33,7 +32,7 @@ const STEPS: { icon: typeof ScanLine; title: string; body: string }[] = [
 ];
 
 export default function Home() {
-  const { meals, quantityOf, addToCart, decrementFromCart } = useDrDiet();
+  const { meals, quantityOf, addToCart, decrementFromCart, subscribers } = useDrDiet();
   const [filter, setFilter] = useState<Goal | "all">("all");
 
   const visibleMeals = useMemo(
@@ -115,7 +114,13 @@ export default function Home() {
           {[
             { icon: Truck, value: "توصيل يومي 6 أيام", label: "داخل البصرة وضواحيها" },
             { icon: ScanLine, value: "وجبات موزونة بالغرام", label: "ماكروز دقيقة لكل صحن" },
-            { icon: Users, value: `+${formatNumber(BRAND_STATS.totalSubscribers)} مشترك`, label: "ثقوا بدكتور دايت" },
+            subscribers.length > 0
+              ? {
+                  icon: Users,
+                  value: `${formatNumber(subscribers.length)} مشترك`,
+                  label: "ثقوا بدكتور دايت",
+                }
+              : { icon: Users, value: "سجل كأول مشترك", label: "المطبخ جاهز يستقبل طلبك" },
           ].map((stat) => (
             <li
               key={stat.value}

@@ -4,7 +4,9 @@ import { MEALS } from "@/data/meals";
 import { SEED_SUBSCRIBERS } from "@/data/subscribers";
 import type { CartLine, Meal, Order, Subscriber } from "@/types";
 
-const STORAGE_KEY = "dr-diet-state-v1";
+/** v2 drops the old demo roster that shipped with v1. */
+const STORAGE_KEY = "dr-diet-state-v2";
+const LEGACY_STORAGE_KEYS = ["dr-diet-state-v1"];
 const ADMIN_SESSION_KEY = "dr-diet-admin-session-v1";
 
 /** Credentials for the دكتور دايت admin console. */
@@ -56,6 +58,7 @@ const DrDietContext = createContext<DrDietValue | null>(null);
 function readPersisted(): Partial<PersistedState> {
   if (typeof window === "undefined") return {};
   try {
+    LEGACY_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
     return JSON.parse(raw) as Partial<PersistedState>;
